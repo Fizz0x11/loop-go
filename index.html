@@ -1,578 +1,401 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="zh-CN" data-theme="tokyo-night">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>loop-go — GitHub 项目自动化处理环</title>
-  <style>
-    :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --surface2: #242836;
-      --border: #2a2f3e;
-      --text: #e4e6ed;
-      --text-muted: #8b8fa3;
-      --accent: #6c8aff;
-      --accent2: #a78bfa;
-      --green: #4ade80;
-      --yellow: #fbbf24;
-      --red: #f87171;
-      --pink: #f472b6;
-    }
-    [data-theme="light"] {
-      --bg: #f8f9fc;
-      --surface: #ffffff;
-      --surface2: #f0f1f5;
-      --border: #d1d5e0;
-      --text: #1a1d27;
-      --text-muted: #6b7280;
-      --accent: #4f6bff;
-      --accent2: #7c3aed;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.7;
-      padding: 2rem;
-    }
-    .container { max-width: 960px; margin: 0 auto; }
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>loop-go — GitHub 项目全链路处理</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/base.css">
+<link rel="stylesheet" id="theme-link" href="../assets/themes/tokyo-night.css">
+<link rel="stylesheet" href="../assets/animations/animations.css">
+<style>
+  :root {
+    --accent: #7aa2f7;
+    --accent-2: #bb9af7;
+    --grad: linear-gradient(135deg,#7aa2f7,#bb9af7 55%,#f7768e);
+  }
+  body { background: var(--bg); }
 
-    /* Header */
-    .hero {
-      text-align: center;
-      padding: 4rem 2rem;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 3rem;
-    }
-    .hero-badge {
-      display: inline-block;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 0.3rem 1rem;
-      border-radius: 99px;
-      margin-bottom: 1.5rem;
-    }
-    .hero h1 {
-      font-size: 3.5rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--accent), var(--accent2), var(--pink));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 1rem;
-    }
-    .hero .subtitle {
-      font-size: 1.25rem;
-      color: var(--text-muted);
-      max-width: 560px;
-      margin: 0 auto 2rem;
-    }
-    .hero-cmd {
-      display: inline-block;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 1rem;
-      color: var(--green);
-    }
+  /* Step flow diagram */
+  .step-flow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 32px;
+  }
+  .step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 16px;
+    text-align: center;
+    position: relative;
+  }
+  .step-card .num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .step-card .who {
+    font-size: 10px;
+    color: var(--text-3);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .step-card h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-1);
+    margin: 0 0 6px 0;
+    line-height: 1.3;
+  }
+  .step-card p {
+    font-size: 11px;
+    color: var(--text-2);
+    margin: 0;
+    line-height: 1.4;
+  }
+  .step-card.maker { border-color: var(--accent); }
+  .step-card.maker .num { color: var(--accent); }
+  .step-card.checker { border-color: var(--accent-2); }
+  .step-card.checker .num { color: var(--accent-2); }
+  .step-card.system { border-color: var(--good); }
+  .step-card.system .num { color: var(--good); }
 
-    /* Theme toggle */
-    .theme-toggle {
-      position: fixed;
-      top: 1.5rem;
-      right: 1.5rem;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      z-index: 100;
-    }
+  /* Arrow between steps */
+  .arrow {
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-3);
+    font-size: 14px;
+    z-index: 2;
+  }
 
-    /* Sections */
-    section { margin-bottom: 4rem; }
-    h2 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
-      color: var(--accent);
-      border-left: 3px solid var(--accent);
-      padding-left: 0.75rem;
-    }
-    h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; }
+  /* Dual agent section */
+  .dual-agent {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .agent-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+  .agent-card.maker-agent { border-top: 3px solid var(--accent); }
+  .agent-card.checker-agent { border-top: 3px solid var(--accent-2); }
+  .agent-card h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: var(--text-1);
+  }
+  .agent-card .role {
+    font-size: 11px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+  .agent-card ul {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.8;
+  }
+  .agent-card ul li { margin-bottom: 4px; }
 
-    /* Cards */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-    }
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1rem;
-    }
+  /* Trigger box */
+  .trigger-box {
+    display: inline-block;
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 10px 20px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    margin: 16px 0;
+  }
 
-    /* Flow diagram */
-    .flow {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      position: relative;
-    }
-    .flow-step {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      position: relative;
-    }
-    .flow-num {
-      flex-shrink: 0;
-      width: 2.5rem;
-      height: 2.5rem;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 0.9rem;
-      color: #fff;
-      z-index: 1;
-    }
-    .flow-num.agent-a { background: linear-gradient(135deg, var(--accent), #818cf8); }
-    .flow-num.agent-b { background: linear-gradient(135deg, var(--pink), var(--accent2)); }
-    .flow-num.green { background: linear-gradient(135deg, var(--green), #34d399); }
-    .flow-num.yellow { background: linear-gradient(135deg, var(--yellow), #fb923c); }
-    .flow-num.red { background: linear-gradient(135deg, var(--red), #fb7185); }
-    .flow-content {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1rem 1.25rem;
-      flex: 1;
-    }
-    .flow-content h4 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-    .flow-content p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-    .flow-line {
-      width: 2px;
-      height: 1rem;
-      background: var(--border);
-      margin-left: 1.25rem;
-    }
+  /* Score table */
+  .score-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 16px;
+  }
+  .score-table th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    color: var(--text-2);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--border);
+  }
+  .score-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-2);
+  }
+  .score-table tr:last-child td { border-bottom: none; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-good { background: rgba(26,175,108,.15); color: var(--good); }
+  .badge-warn { background: rgba(245,165,36,.15); color: var(--warn); }
+  .badge-bad { background: rgba(224,68,90,.15); color: var(--bad); }
 
-    /* Verdict tags */
-    .tag {
-      display: inline-block;
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    .tag-pass { background: rgba(74,222,128,0.15); color: var(--green); }
-    .tag-retry { background: rgba(251,191,36,0.15); color: var(--yellow); }
-    .tag-fail { background: rgba(248,113,113,0.15); color: var(--red); }
-
-    /* Code */
-    pre {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1rem 1.25rem;
-      overflow-x: auto;
-      font-size: 0.85rem;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      color: var(--text);
-      margin-bottom: 1rem;
-    }
-    code {
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 0.85rem;
-      color: var(--accent2);
-    }
-
-    /* Table */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 1rem;
-    }
-    th, td {
-      text-align: left;
-      padding: 0.75rem 1rem;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.9rem;
-    }
-    th {
-      font-weight: 600;
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    tr:hover td { background: var(--surface2); }
-
-    /* Principle highlight */
-    .principle {
-      background: linear-gradient(135deg, rgba(108,138,255,0.08), rgba(167,139,250,0.08));
-      border: 1px solid var(--accent);
-      border-radius: 10px;
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-    .principle strong { color: var(--accent); }
-
-    /* Screenshot */
-    .screenshot {
-      width: 100%;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      margin: 1rem 0;
-    }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      padding: 2rem;
-      border-top: 1px solid var(--border);
-      color: var(--text-muted);
-      font-size: 0.85rem;
-    }
-
-    /* Responsive */
-    @media (max-width: 600px) {
-      .hero h1 { font-size: 2.2rem; }
-      .flow-step { flex-direction: column; gap: 0.5rem; }
-      .flow-line { display: none; }
-    }
-  </style>
+  /* Theme switcher */
+  .theme-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 8px 16px;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+  .theme-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform .2s, border-color .2s;
+  }
+  .theme-btn:hover { transform: scale(1.2); }
+  .theme-btn.active { border-color: var(--text-1); }
+</style>
 </head>
 <body>
+<div class="deck">
 
-<button class="theme-toggle" onclick="toggleTheme()">◐ 切换主题</button>
-
-<div class="container">
-
-  <!-- Hero -->
-  <div class="hero">
-    <div class="hero-badge">Hermes Skill #648</div>
-    <h1>loop-go</h1>
-    <p class="subtitle">给一个 GitHub 链接，AI 自动跑完：clone → 测试 → 写介绍 → 存 Wiki → 自检验收 → 人味儿沉淀</p>
-    <div class="hero-cmd">loop-go https://github.com/owner/repo</div>
-  </div>
-
-  <!-- What is it -->
-  <section>
-    <h2>这是什么</h2>
-    <div class="card">
-      <p><strong>loop-go</strong> 是 Hermes Agent 的 GitHub 项目处理循环。触发一次，AI 跑完全链路，不半途而废。</p>
-      <br>
-      <p>适用场景：想了解一个新项目 / 想把项目介绍给同事 / 想把项目沉淀进自己的知识库。</p>
-    </div>
-    <div class="card-grid">
-      <div class="card">
-        <h3>🎯 做什么</h3>
-        <p>Clone → 测试真实可用性 → 写人味儿介绍 → 存 WPS Wiki → 自检验收 → 复盘沉淀</p>
-      </div>
-      <div class="card">
-        <h3>⚙️ 怎么跑</h3>
-        <p>说一句话即可：<code>loop-go &lt;GitHub-URL&gt;</code></p>
-      </div>
-      <div class="card">
-        <h3>🧠 设计哲学</h3>
-        <p>干活 agent 和验收 agent 分离，确保测试结果是真实的，不是 AI 幻觉。</p>
-      </div>
+  <!-- Slide 1: Cover -->
+  <section class="slide is-active" data-title="Cover">
+    <p class="kicker" style="color:var(--text-3);font-size:13px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px;">Skill #648 · GitHub Loop System</p>
+    <h1 class="h1 anim-fade-up" data-anim="fade-up" style="font-size:72px;line-height:1.05;margin:0 0 24px 0;letter-spacing:var(--letter-tight);">
+      loop-go
+    </h1>
+    <p class="lede" style="font-size:20px;color:var(--text-2);margin:0 0 8px 0;">Give a GitHub URL · AI runs the full loop</p>
+    <p style="font-size:14px;color:var(--text-3);margin:0 0 32px 0;">clone → test → introduce → wiki → review → handoff</p>
+    <div class="trigger-box">loop-go https://github.com/owner/repo</div>
+    <div class="deck-footer" style="position:absolute;bottom:32px;left:96px;right:96px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:12px;color:var(--text-3);">Fizz · 2026</span>
+      <span style="font-size:12px;color:var(--text-3);">github.com/Fizz0x11/loop-go</span>
     </div>
   </section>
 
-  <!-- Flow -->
-  <section>
-    <h2>8 步完整流程</h2>
-
-    <div class="flow">
-
-      <!-- Step 1: Clone -->
-      <div class="flow-step">
-        <div class="flow-num agent-a">1</div>
-        <div class="flow-content">
-          <h4>干活 agent — Clone + 初步测试</h4>
-          <p>找 workdir → gh repo clone → 读取 README → 尝试跑 npm/pip/go mod 等依赖安装 → 记录结果</p>
-        </div>
+  <!-- Slide 2: What it does -->
+  <section class="slide" data-title="What">
+    <p class="kicker">What it does</p>
+    <h2 class="h2">One trigger · Full loop · Zero shortcuts</h2>
+    <div class="step-flow">
+      <div class="step-card maker"><span class="arrow">→</span>
+        <div class="num">STEP 01</div><div class="who">Maker Agent</div>
+        <h4>Clone + Test</h4><p>gh repo clone · npm install · run test</p>
       </div>
-      <div class="flow-line"></div>
-
-      <!-- Step 2: Verification -->
-      <div class="flow-step">
-        <div class="flow-num agent-b">2</div>
-        <div class="flow-content">
-          <h4>验收 agent — 打分</h4>
-          <p>对照标准打分（0-10）。8-10 分通过，5-7 分补项，0-4 分打回重做。</p>
-        </div>
+      <div class="step-card checker"><span class="arrow">→</span>
+        <div class="num">STEP 02</div><div class="who">Checker Agent</div>
+        <h4>Score 0-10</h4><p>8+ pass · 5-7 fix · 0-4 retry</p>
       </div>
-      <div class="flow-line"></div>
-
-      <!-- Step 3: Wiki -->
-      <div class="flow-step">
-        <div class="flow-num green">3</div>
-        <div class="flow-content">
-          <h4>写 WPS Wiki</h4>
-          <p>用 kdocs-cli 写到 Fizz-tools-多啦A梦，包含：真实测试结果、人味儿介绍、所有步骤记录</p>
-          <p style="margin-top:0.5rem;color:var(--accent);font-size:0.8rem;">⚠️ Web 项目必须截图，图片嵌入 Wiki</p>
-        </div>
+      <div class="step-card system"><span class="arrow">→</span>
+        <div class="num">STEP 03</div><div class="who">System</div>
+        <h4>Write Wiki</h4><p>kdocs-cli · WPS Wiki</p>
       </div>
-      <div class="flow-line"></div>
-
-      <!-- Step 4: 631 -->
-      <div class="flow-step">
-        <div class="flow-num">4</div>
-        <div class="flow-content">
-          <h4>631 自检验收</h4>
-          <p>对照 5 组件 + 1 外部记忆逐项打勾。不合格必须补到合格，才算完成。</p>
-        </div>
+      <div class="step-card system">
+        <div class="num">STEP 04</div><div class="who">System</div>
+        <h4>631 Self-audit</h4><p>5 components · external memory</p>
       </div>
-      <div class="flow-line"></div>
-
-      <!-- Step 5: CE -->
-      <div class="flow-step">
-        <div class="flow-num">5</div>
-        <div class="flow-content">
-          <h4>CE Review</h4>
-          <p>Plan（写策略）→ Work（执行）→ Review（复盘）→ Compound（经验变资产）</p>
-        </div>
-      </div>
-      <div class="flow-line"></div>
-
-      <!-- Step 6: Self-review -->
-      <div class="flow-step">
-        <div class="flow-num yellow">6</div>
-        <div class="flow-content">
-          <h4>648-1 自我复盘</h4>
-          <p>检查本次 loop 自身：clone 真跑了？测试真跑了？handoff 写了？Review 栏填了？</p>
-        </div>
-      </div>
-      <div class="flow-line"></div>
-
-      <!-- Step 7: renwei -->
-      <div class="flow-step">
-        <div class="flow-num">7</div>
-        <div class="flow-content">
-          <h4>写人味儿 handoff</h4>
-          <p>调用 682 renwei-writing，输出一份可以发给朋友的介绍：场景+代价+位置+工具对照表</p>
-        </div>
-      </div>
-      <div class="flow-line"></div>
-
-      <!-- Step 8 -->
-      <div class="flow-step">
-        <div class="flow-num green">8</div>
-        <div class="flow-content">
-          <h4>主动问后续需求</h4>
-          <p>Loop 完成后主动问：要不要配 cron 定时跑？要不要飞书卡片推送？</p>
-        </div>
-      </div>
-
+    </div>
+    <div style="margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+      <div class="step-card system"><span class="arrow">→</span><div class="num">STEP 05</div><div class="who">System</div><h4>CE Review</h4><p>Plan·Work·Review·Compound</p></div>
+      <div class="step-card system"><span class="arrow">→</span><div class="num">STEP 06</div><div class="who">System</div><h4>Self-reflect</h4><p>Honest checklist</p></div>
+      <div class="step-card system"><span class="arrow">→</span><div class="num">STEP 07</div><div class="who">System</div><h4>Handoff</h4><p>Human-readable record</p></div>
+      <div class="step-card system"><div class="num">STEP 08</div><div class="who">System</div><h4>Ask</h4><p>Cron? Feishu card?</p></div>
     </div>
   </section>
 
-  <!-- Dual agent principle -->
-  <section>
-    <h2>核心设计：双 agent 分离</h2>
-    <div class="principle">
-      <strong>干活 agent</strong> = 执行层（clone + 测试 + Wiki 初稿）<br>
-      <strong>验收 agent</strong> = 裁判层（对照标准打分，不合格打回）<br>
-      <strong>两者不是同一个 agent，不能读彼此的 connector 文件。</strong>
+  <!-- Slide 3: Dual Agent -->
+  <section class="slide" data-title="Dual Agent">
+    <p class="kicker">Core Design</p>
+    <h2 class="h2">Maker 与 Checker 必须分离</h2>
+    <div class="dual-agent">
+      <div class="agent-card maker-agent">
+        <h4>Maker Agent</h4>
+        <div class="role">执行层 · Cloner</div>
+        <ul>
+          <li>Clone + read README</li>
+          <li>Install dependencies</li>
+          <li>Run a real test command</li>
+          <li>Write Wiki draft</li>
+          <li>Call <code>connector/clone-and-test.md</code></li>
+        </ul>
+      </div>
+      <div class="agent-card checker-agent">
+        <h4>Checker Agent</h4>
+        <div class="role">验收层 · Auditor</div>
+        <ul>
+          <li>Score output 0-10</li>
+          <li>Check: did clone actually run?</li>
+          <li>Check: did tests actually execute?</li>
+          <li>Reject if score &lt; 8</li>
+          <li>Call <code>connector/verification.md</code></li>
+        </ul>
+      </div>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Agent</th>
-          <th>角色</th>
-          <th>读什么</th>
-          <th>输出什么</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><strong>干活 agent</strong></td>
-          <td>执行者（maker）</td>
-          <td><code>clone-and-test.md</code></td>
-          <td>真实测试结果 + Wiki 初稿</td>
-        </tr>
-        <tr>
-          <td><strong>验收 agent</strong></td>
-          <td>裁判（checker）</td>
-          <td><code>verification.md</code></td>
-          <td>打分 + 结论（通过/补项/打回）</td>
-        </tr>
-      </tbody>
+    <p style="margin-top:20px;font-size:13px;color:var(--text-3);text-align:center;">
+      Same agent doing both = easy to fool yourself. The separation makes results real.
+    </p>
+  </section>
+
+  <!-- Slide 4: Scoring -->
+  <section class="slide" data-title="Scoring">
+    <p class="kicker">Verification</p>
+    <h2 class="h2">8 分及格线</h2>
+    <table class="score-table">
+      <tr><th>Score</th><th>Verdict</th><th>Action</th></tr>
+      <tr>
+        <td><span class="badge badge-good">8–10</span></td>
+        <td>✅ Pass</td>
+        <td>Continue to next step</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-warn">5–7</span></td>
+        <td>⚠️ Fix items</td>
+        <td>List what to fix, back to maker</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-bad">0–4</span></td>
+        <td>🔴 Fail</td>
+        <td>Retry from step 1</td>
+      </tr>
     </table>
-    <div class="card">
-      <p><strong>为什么要分离？</strong> 同一个人又干活又验收，容易自己骗自己。验收 agent 有独立判断标准，测试结果必须是真实的，不能是"看起来没问题"。</p>
+    <div style="margin-top:24px;padding:16px;background:var(--surface-2);border-radius:var(--radius-sm);border-left:3px solid var(--accent);">
+      <p style="margin:0;font-size:13px;color:var(--text-2);line-height:1.6;">
+        <strong>Score dimensions:</strong><br>
+        A) Basic info (project type, README) · B) Reality check (did commands actually run?) · C) Wiki quality
+      </p>
     </div>
   </section>
 
-  <!-- Verification criteria -->
-  <section>
-    <h2>验收打分标准</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>分数</th>
-          <th>结论</th>
-          <th>处理</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><span class="tag tag-pass">8-10 分</span></td>
-          <td>✅ 验收通过</td>
-          <td>进入下一步</td>
-        </tr>
-        <tr>
-          <td><span class="tag tag-retry">5-7 分</span></td>
-          <td>⚠️ 需补项</td>
-          <td>列出具体要补什么，回到干活 agent 补</td>
-        </tr>
-        <tr>
-          <td><span class="tag tag-fail">0-4 分</span></td>
-          <td>🔴 不合格</td>
-          <td>打回重做</td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="card">
-      <p><strong>打分维度：</strong>A 项目基本信息（clone 成功？README 完整？）+ B 真实性检查（依赖真装了？测试命令真跑了？）+ C Wiki 质量（格式规范？内容完整？）</p>
+  <!-- Slide 5: File Structure -->
+  <section class="slide" data-title="Files">
+    <p class="kicker">Repository</p>
+    <h2 class="h2">File Structure</h2>
+    <pre style="background:var(--surface-2);border-radius:var(--radius);padding:24px;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--text-2);margin-top:16px;overflow:auto;">
+loop-go/
+├── index.html              ← Presentation (this page)
+├── README.md               ← English project README
+├── SKILL.md                ← Parent skill (trigger entry)
+├── LICENSE                 ← MIT
+└── loop-go-exec/
+    ├── SKILL.md            ← Execution layer (326 lines, 8 steps)
+    └── references/connector/
+        ├── clone-and-test.md   ← Maker agent instructions
+        └── verification.md     ← Checker agent criteria
+    </pre>
+    <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="padding:14px;background:var(--surface-2);border-radius:var(--radius-sm);font-size:12px;color:var(--text-2);">
+        <strong style="color:var(--text-1)">Hermes skill:</strong><br>
+        hermes/skills/648-github-project-loop/
+      </div>
+      <div style="padding:14px;background:var(--surface-2);border-radius:var(--radius-sm);font-size:12px;color:var(--text-2);">
+        <strong style="color:var(--text-1)">Live demo:</strong><br>
+        fizz0x11.github.io/loop-go/
+      </div>
     </div>
   </section>
 
-  <!-- Self-review table -->
-  <section>
-    <h2>648-1 自我复盘表</h2>
-    <p style="color:var(--text-muted);margin-bottom:1rem;">Loop 跑完之后，AI 必须自检这次 loop 自身有没有敷衍。</p>
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>检查项</th>
-          <th>合格标准</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>1</td>
-          <td>clone 真跑了？</td>
-          <td>gh repo clone 命令实际执行了</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>测试命令真跑了？</td>
-          <td>依赖安装/验证命令实际执行了</td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>renwei handoff 写了？</td>
-          <td>写了一份符合格式的 handoff 追加到 BD</td>
-        </tr>
-        <tr>
-          <td>4</td>
-          <td>CE Review 栏填了？</td>
-          <td>做对了/做错了/下次改 三项都填了</td>
-        </tr>
-        <tr>
-          <td>5</td>
-          <td>自检有没有敷衍？</td>
-          <td>填的都是 ✅ 还是真的有原因？</td>
-        </tr>
-        <tr>
-          <td>6</td>
-          <td>下次改什么？</td>
-          <td>本次最大 1 个改进点</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- Example output -->
-  <section>
-    <h2>给朋友介绍时怎么说</h2>
-    <div class="card">
-      <p>我有一套叫 loop-go 的自动化流程。给一个 GitHub 链接，它自动跑完：真实 clone 测试、人味儿介绍、WPS Wiki 沉淀、复盘。不用盯着，AI 自己完成全链路。</p>
+  <!-- Slide 6: Self-reflection -->
+  <section class="slide" data-title="Reflect">
+    <p class="kicker">Step 6</p>
+    <h2 class="h2">Self-Reflection Checklist</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px;">
+      <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2);">
+        <span style="color:var(--accent);font-weight:700;margin-right:8px;">✓</span>
+        clone 真的跑了吗？
+      </div>
+      <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2);">
+        <span style="color:var(--accent);font-weight:700;margin-right:8px;">✓</span>
+        测试命令真的执行了吗？
+      </div>
+      <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2);">
+        <span style="color:var(--accent);font-weight:700;margin-right:8px;">✓</span>
+        handoff 写了吗？
+      </div>
+      <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2);">
+        <span style="color:var(--accent);font-weight:700;margin-right:8px;">✓</span>
+        CE Review 三个字段填全了吗？
+      </div>
+      <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2);">
+        <span style="color:var(--accent);font-weight:700;margin-right:8px;">✓</span>
+        自检诚实吗？
+      </div>
+      <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2);">
+        <span style="color:var(--accent);font-weight:700;margin-right:8px;">→</span>
+        下次要改什么？
+      </div>
     </div>
-    <div class="card">
-      <h3>工具对照表</h3>
-      <table>
-        <thead>
-          <tr><th>工具</th><th>管什么</th><th>什么时候用</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><code>loop-go</code></td><td>GitHub 项目全链路处理</td><td>想了解/介绍/沉淀一个新项目</td></tr>
-          <tr><td><code>648-1 SKILL.md</code></td><td>loop 执行层 SOP</td><td>AI 每次自动读</td></tr>
-          <tr><td><code>682 renwei-writing</code></td><td>人味儿 skill 介绍</td><td>写给朋友看的介绍</td></tr>
-          <tr><td><code>631 5组件自检</code></td><td>Loop 工程验收</td><td>检查 loop 自身质量</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- How to use -->
-  <section>
-    <h2>怎么用</h2>
-    <div class="card">
-      <h3>触发方式</h3>
-      <pre>loop-go https://github.com/owner/repo
-
-# 或者更简单
-loop-go &lt;GitHub-URL&gt;</pre>
-    </div>
-    <div class="card">
-      <h3>前置条件</h3>
-      <p>需要 Hermes Agent 环境，已配置 kdocs-cli（WPS Wiki）、gh CLI（GitHub）等工具。</p>
-    </div>
+    <p style="margin-top:20px;font-size:13px;color:var(--text-3);text-align:center;">
+      After each loop, the AI checks itself. The loop improves itself.
+    </p>
   </section>
 
 </div>
 
-<footer>
-  loop-go · Hermes Skill #648 · 2026-06-14<br>
-  全链路走完才算完成，只跑一半不算。
-</footer>
+<!-- Theme switcher bar -->
+<div class="theme-bar">
+  <button class="theme-btn active" style="background:#7aa2f7;" onclick="setTheme('tokyo-night')" title="Tokyo Night"></button>
+  <button class="theme-btn" style="background:#bd93f9;" onclick="setTheme('dracula')" title="Dracula"></button>
+  <button class="theme-btn" style="background:#89b4fa;" onclick="setTheme('nord')" title="Nord"></button>
+  <button class="theme-btn" style="background:#cba6f7;" onclick="setTheme('catppuccin-mocha')" title="Catppuccin Mocha"></button>
+  <button class="theme-btn" style="background:#f7768e;" onclick="setTheme('rose-pine')" title="Rose Pine"></button>
+  <button class="theme-btn" style="background:#a9b1d6;" onclick="setTheme('gruvbox-dark')" title="Gruvbox"></button>
+</div>
 
+<script src="../assets/runtime.js"></script>
 <script>
-  // Theme toggle
-  const html = document.documentElement;
-  const btn = document.querySelector('.theme-toggle');
+const THEMES = ['tokyo-night','dracula','nord','catppuccin-mocha','rose-pine','gruvbox-dark'];
+let themeIdx = 0;
 
-  // Init from localStorage
-  if (localStorage.getItem('theme') === 'light') {
-    html.setAttribute('data-theme', 'light');
-  }
+function setTheme(name) {
+  document.getElementById('theme-link').href = `../assets/themes/${name}.css`;
+  document.documentElement.setAttribute('data-theme', name);
+  document.querySelectorAll('.theme-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', THEMES[i] === name);
+  });
+  localStorage.setItem('loop-go-theme', name);
+}
 
-  function toggleTheme() {
-    const current = html.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
+const saved = localStorage.getItem('loop-go-theme');
+if (saved) setTheme(saved);
+
+// Keyboard: T = theme, ←→ = slides, number = jump
+document.addEventListener('keydown', e => {
+  if (e.key === 't' || e.key === 'T') {
+    themeIdx = (themeIdx + 1) % THEMES.length;
+    setTheme(THEMES[themeIdx]);
   }
+});
 </script>
-
 </body>
 </html>
