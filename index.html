@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>loop-go — GitHub 项目全链路处理</title>
-<link rel="stylesheet" href="../assets/fonts.css">
-<link rel="stylesheet" href="../assets/base.css">
-<link rel="stylesheet" id="theme-link" href="../assets/themes/tokyo-night.css">
-<link rel="stylesheet" href="../assets/animations/animations.css">
+<link rel="stylesheet" href="/loop-go/assets/fonts.css">
+<link rel="stylesheet" href="/loop-go/assets/base.css">
+<link rel="stylesheet" id="theme-link" href="/loop-go/assets/themes/tokyo-night.css">
+<link rel="stylesheet" href="/loop-go/assets/animations/animations.css">
 <style>
   :root {
     --accent: #7aa2f7;
@@ -372,13 +372,13 @@ loop-go/
   <button class="theme-btn" style="background:#a9b1d6;" onclick="setTheme('gruvbox-dark')" title="Gruvbox"></button>
 </div>
 
-<script src="../assets/runtime.js"></script>
+<script src="/loop-go/assets/runtime.js"></script>
 <script>
 const THEMES = ['tokyo-night','dracula','nord','catppuccin-mocha','rose-pine','gruvbox-dark'];
 let themeIdx = 0;
 
 function setTheme(name) {
-  document.getElementById('theme-link').href = `../assets/themes/${name}.css`;
+  document.getElementById('theme-link').href = `/loop-go/assets/themes/${name}.css`;
   document.documentElement.setAttribute('data-theme', name);
   document.querySelectorAll('.theme-btn').forEach((btn, i) => {
     btn.classList.toggle('active', THEMES[i] === name);
