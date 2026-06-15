@@ -7,343 +7,455 @@
 <link rel="stylesheet" href="/loop-go/assets/fonts.css">
 <link rel="stylesheet" href="/loop-go/assets/base.css">
 <link rel="stylesheet" id="theme-link" href="/loop-go/assets/themes/aurora.css">
-<link rel="stylesheet" href="/loop-go/assets/animations/animations.css">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--page-bg:#080a12;--card-bg:#0f1320;--card-border:rgba(255,255,255,.07);--text-muted:#6b7280;--font-mono:ui-monospace,'Cascadia Code',monospace}
+  body{background:var(--page-bg);color:var(--text-1);font-family:'Inter','PingFang SC',system-ui,sans-serif;line-height:1.6;overflow-x:hidden}
+  [data-theme="minimal-white"]{--page-bg:#f8f7f4;--card-bg:#fff;--card-border:#e5e3df}
+  [data-theme="tokyo-night"],[data-theme="dracula"],[data-theme="nord"],[data-theme="catppuccin-mocha"],[data-theme="gruvbox-dark"],[data-theme="aurora"],[data-theme="neo-brutalism"]{--page-bg:#0b0d14;--card-bg:#111520;--card-border:rgba(255,255,255,.08)}
+  [data-theme="xiaohongshu-white"]{--page-bg:#faf9f7;--card-bg:#fff;--card-border:#f0ece6}
+
+  /* ── sticky header ── */
+  header{position:sticky;top:0;z-index:100;background:rgba(8,10,18,.85);backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--card-border);padding:14px 40px;display:flex;align-items:center;
+    gap:20px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+  .brand-logo{width:36px;height:36px;background:var(--grad,linear-gradient(135deg,#7aa2f7,#bb9af7));border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#fff}
+  .brand-text{font-size:18px;font-weight:700;letter-spacing:-.02em}
+  .brand-text span{display:block;font-size:11px;font-weight:400;color:var(--text-muted);letter-spacing:0}
+  .header-spacer{flex:1}
+  .theme-buttons{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .theme-btn{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s,border-color .15s;padding:0;background:none}
+  .theme-btn:hover{transform:scale(1.2)}
+  .theme-btn.active{border-color:var(--text-1)}
+  .theme-label{font-size:12px;color:var(--text-muted);font-family:var(--font-mono)}
+
+  /* ── sections ── */
+  .section{padding:60px 40px;max-width:1280px;margin:0 auto}
+  .section-kicker{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;font-family:var(--font-mono)}
+  .section-title{font-size:clamp(24px,4vw,40px);font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:32px}
+  .section-title .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* ── cover hero ── */
+  .hero{padding:80px 40px 60px;text-align:center;max-width:900px;margin:0 auto}
+  .hero-kicker{display:inline-block;padding:4px 12px;background:var(--surface-2);border-radius:100px;font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.05em;margin-bottom:20px;font-family:var(--font-mono)}
+  .hero h1{font-size:clamp(48px,10vw,96px);font-weight:900;letter-spacing:-.04em;line-height:.95;margin-bottom:20px}
+  .hero h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero-lede{font-size:clamp(16px,2.5vw,22px);color:var(--text-2);max-width:640px;margin:0 auto 32px;line-height:1.5}
+  .hero-pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
+  .pill{display:inline-block;padding:6px 14px;background:var(--surface-2);border:1px solid var(--card-border);border-radius:100px;font-size:12px;font-weight:500;color:var(--text-2)}
+  .pill-accent{background:color-mix(in srgb,var(--accent) 15%,transparent);border-color:color-mix(in srgb,var(--accent) 30%,transparent);color:var(--accent)}
+  .hero-trigger{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;background:var(--grad,linear-gradient(135deg,#7aa2f7,#bb9af7));border-radius:12px;font-size:16px;font-weight:700;color:#fff;cursor:pointer;border:none;font-family:inherit}
+  .hero-trigger code{background:rgba(255,255,255,.2);padding:2px 8px;border-radius:6px;font-size:14px}
+
+  /* ── divider ── */
+  .divider{height:1px;background:var(--card-border);max-width:1280px;margin:0 auto}
+
+  /* ── pain cards ── */
+  .pain-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+  .pain-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:24px;transition:border-color .2s}
+  .pain-card:hover{border-color:var(--accent)}
+  .pain-num{font-size:11px;font-weight:700;color:var(--accent);font-family:var(--font-mono);margin-bottom:10px;letter-spacing:.08em}
+  .pain-card h3{font-size:16px;font-weight:700;margin-bottom:8px}
+  .pain-card p{font-size:13px;color:var(--text-2);line-height:1.55}
+
+  /* ── 8-step flow ── */
+  .flow-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+  .flow-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:20px;position:relative;overflow:hidden}
+  .flow-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad,linear-gradient(90deg,#7aa2f7,#bb9af7))}
+  .flow-num{font-size:10px;font-weight:700;color:var(--accent);font-family:var(--font-mono);margin-bottom:8px;letter-spacing:.1em}
+  .flow-card h4{font-size:15px;font-weight:700;margin-bottom:6px}
+  .flow-card p{font-size:12px;color:var(--text-2)}
+  .flow-card.last{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 5%,var(--card-bg))}
+  .flow-card.last::before{background:var(--accent)}
+
+  /* ── arch ── */
+  .arch-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:700px){.arch-grid{grid-template-columns:1fr}}
+  .arch-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:28px}
+  .arch-card h3{font-size:20px;font-weight:800;margin-bottom:4px}
+  .arch-card .sub{font-size:13px;color:var(--text-2);margin-bottom:20px}
+  .arch-card ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .arch-card li{font-size:13px;color:var(--text-2);padding-left:20px;position:relative}
+  .arch-card li::before{content:'→';position:absolute;left:0;color:var(--accent);font-weight:700}
+  .arch-badge{display:inline-block;padding:3px 10px;background:var(--surface-2);border-radius:6px;font-size:11px;font-family:var(--font-mono);color:var(--text-2);margin-top:16px}
+
+  /* ── outputs ── */
+  .out-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+  .out-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:24px}
+  .out-icon{font-size:28px;margin-bottom:14px}
+  .out-card h4{font-size:16px;font-weight:700;margin-bottom:8px}
+  .out-card p{font-size:13px;color:var(--text-2);line-height:1.55;margin-bottom:14px}
+  .out-card pre{background:var(--surface-2);border-radius:8px;padding:10px 14px;font-size:11px;font-family:var(--font-mono);color:var(--text-2);overflow:auto}
+
+  /* ── compare table ── */
+  .compare-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;overflow:hidden}
+  .compare-table{width:100%;border-collapse:collapse;font-size:14px}
+  .compare-table th{text-align:left;padding:16px 20px;background:var(--surface-2);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-2);font-family:var(--font-mono)}
+  .compare-table td{padding:14px 20px;border-top:1px solid var(--card-border)}
+  .compare-table tr:first-child td{border-top:none}
+  .compare-table .good{color:var(--accent);font-weight:600}
+  .compare-table .bad{color:var(--text-2)}
+  .compare-table tfoot td{background:var(--surface-2);font-weight:700}
+
+  /* ── trigger ── */
+  .trigger-box{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:32px;text-align:center}
+  .trigger-box pre{background:var(--surface-2);border-radius:12px;padding:20px 28px;font-size:16px;font-family:var(--font-mono);display:inline-block;text-align:left;margin:16px 0}
+  .trigger-box .cmd{color:var(--accent)}
+  .trigger-box .cmt{color:var(--text-2)}
+  .trigger-info{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+  .trigger-info .info-chip{background:var(--surface-2);border:1px solid var(--card-border);border-radius:8px;padding:10px 16px;text-align:center}
+  .trigger-info .info-chip .label{font-size:11px;color:var(--text-2);margin-bottom:4px;font-family:var(--font-mono)}
+  .trigger-info .info-chip .val{font-size:14px;font-weight:700}
+
+  /* ── footer ── */
+  footer{text-align:center;padding:40px;border-top:1px solid var(--card-border);color:var(--text-2);font-size:13px}
+  footer a{color:var(--accent);text-decoration:none}
+  .kbd{display:inline-block;padding:2px 7px;background:var(--surface-2);border:1px solid var(--card-border);border-radius:4px;font-size:11px;font-family:var(--font-mono)}
+</style>
 </head>
-<body data-themes="aurora,tokyo-night,dracula,catppuccin-mocha,nord,gruvbox-dark,xiaohongshu-white,neo-brutalism" data-theme-base="/loop-go/assets/themes/">
+<body>
 
-<div class="deck">
+<!-- ── HEADER ── -->
+<header>
+  <a class="brand" href="https://github.com/Fizz0x11/loop-go">
+    <div class="brand-logo">LG</div>
+    <div class="brand-text">loop-go<span>GitHub 项目全链路处理 · hermes skill #648</span></div>
+  </a>
+  <div class="header-spacer"></div>
+  <div class="theme-buttons">
+    <span class="theme-label">Theme:</span>
+    <button class="theme-btn active" style="background:#5ef2c6" onclick="setTheme('aurora')" title="Aurora"></button>
+    <button class="theme-btn" style="background:#7aa2f7" onclick="setTheme('tokyo-night')" title="Tokyo Night"></button>
+    <button class="theme-btn" style="background:#bd93f9" onclick="setTheme('dracula')" title="Dracula"></button>
+    <button class="theme-btn" style="background:#8bace3" onclick="setTheme('nord')" title="Nord"></button>
+    <button class="theme-btn" style="background:#cba6f7" onclick="setTheme('catppuccin-mocha')" title="Catppuccin"></button>
+    <button class="theme-btn" style="background:#fabd2f" onclick="setTheme('gruvbox-dark')" title="Gruvbox"></button>
+    <button class="theme-btn" style="background:#f4f4f0" onclick="setTheme('minimal-white')" title="Minimal White"></button>
+    <button class="theme-btn" style="background:#ff66ff;#f0e68c" onclick="setTheme('xiaohongshu-white')" title="小红书"></button>
+    <button class="theme-btn" style="background:#ff5f5f" onclick="setTheme('neo-brutalism')" title="Neo Brutalism"></button>
+  </div>
+</header>
 
-  <!-- 1. Cover -->
-  <section class="slide" data-title="Cover">
-    <div class="deck-header">
-      <span class="eyebrow">GitHub Loop · Fizz0x11</span>
-      <span class="eyebrow">hermes skill #648</span>
-    </div>
-    <p class="kicker">GitHub 项目处理自动化</p>
-    <h1 class="h1 anim-rise-in" data-anim="rise-in">loop-go</h1>
-    <p class="lede">说一句话，AI 自动跑完整个 GitHub 项目：<br>clone → 分析 → 测试 → 写人味儿介绍 → 推 Wiki → 自检验收</p>
-    <div class="row wrap mt-l" style="gap:8px">
-      <span class="pill pill-accent">8步闭环</span>
-      <span class="pill">Maker + Checker</span>
-      <span class="pill">WPS Wiki</span>
-      <span class="pill">飞书推送</span>
-    </div>
-    <div class="deck-footer">
-      <span class="dim2">触发词：loop-go &lt;GitHub-URL&gt;</span>
-      <span class="slide-number" data-current="1" data-total="9"></span>
-    </div>
-    <div class="notes">这是一次完整的 loop-go 演示。双击打开这个 HTML 就能用——按 T 换主题，按 ← → 翻页。</div>
-  </section>
-
-  <!-- 2. Pain Point -->
-  <section class="slide" data-title="Pain">
-    <p class="kicker">Pain Point</p>
-    <h2 class="h2">手动处理 GitHub 项目，每一步都在重复</h2>
-    <div class="grid g2 mt-l anim-stagger-list" data-anim-target>
-      <div class="card card-accent">
-        <h4>① clone 下来跑不动</h4>
-        <p class="dim">依赖装不上、README过时、环境变量缺失——每次都要手动排查。</p>
-      </div>
-      <div class="card card-accent">
-        <h4>② 分析靠人工读 README</h4>
-        <p class="dim">项目结构、技术栈、核心模块——读完还是一头雾水。</p>
-      </div>
-      <div class="card card-accent">
-        <h4>③ 写介绍比项目本身还累</h4>
-        <p class="dim">要把技术细节转成别人能看懂的人味儿介绍，比写代码还费时间。</p>
-      </div>
-      <div class="card card-accent">
-        <h4>④ 沉淀一次不够，每次都要重来</h4>
-        <p class="dim">Wiki / 飞书 / 文档——每个平台格式都不一样，每次都要重新排版。</p>
-      </div>
-    </div>
-    <div class="deck-footer">
-      <span class="dim2">问题</span>
-      <span class="slide-number" data-current="2" data-total="9"></span>
-    </div>
-    <div class="notes">这四个问题是每个AI工程师日常都会遇到的。loop-go 就是来解决这个的。</div>
-  </section>
-
-  <!-- 3. What is loop-go -->
-  <section class="slide center tc" data-title="What">
-    <div style="max-width:1100px">
-      <p class="kicker">What is loop-go</p>
-      <h1 class="h1 anim-rise-in" data-anim="rise-in" style="font-size:80px">一句话，<span class="gradient-text">全自动</span></h1>
-      <div class="card mt-l anim-fade-up" data-anim="fade-up">
-        <p class="serif" style="font-size:36px;line-height:1.5;text-align:center">
-          「帮我跑一下这个项目」<br>
-          <span class="dim">↓</span><br>
-          AI 自动完成：clone → 分析 → 测试 → 沉淀 → 验收
-        </p>
-      </div>
-      <div class="grid g3 mt-l">
-        <div class="card"><p class="kicker" style="font-size:32px">⚡</p><p class="dim">分钟级</p><p class="dim2">以前手动30分钟<br>现在30秒</p></div>
-        <div class="card"><p class="kicker" style="font-size:32px">🧠</p><p class="dim">双Agent</p><p class="dim2">Maker执行<br>Checker验收</p></div>
-        <div class="card"><p class="kicker" style="font-size:32px">📚</p><p class="dim">自动沉淀</p><p class="dim2">WPS Wiki<br>飞书卡片</p></div>
-      </div>
-    </div>
-    <div class="deck-footer">
-      <span class="dim2">是什么</span>
-      <span class="slide-number" data-current="3" data-total="9"></span>
-    </div>
-  </section>
-
-  <!-- 4. 8-Step Flow -->
-  <section class="slide" data-title="Flow">
-    <p class="kicker">8步闭环</p>
-    <h2 class="h2">loop-go 的完整执行流程</h2>
-    <div class="grid g4 mt-l anim-stagger-list" data-anim-target>
-      <div class="card">
-        <p class="kicker" style="font-size:28px">①</p>
-        <h4>Trigger</h4>
-        <p class="dim" style="font-size:13px">用户说「loop-go &lt;URL&gt;」</p>
-      </div>
-      <div class="card">
-        <p class="kicker" style="font-size:28px">②</p>
-        <h4>Clone</h4>
-        <p class="dim" style="font-size:13px">git clone + 初步环境验证</p>
-      </div>
-      <div class="card">
-        <p class="kicker" style="font-size:28px">③</p>
-        <h4>Test</h4>
-        <p class="dim" style="font-size:13px">运行测试、验证依赖完整性</p>
-      </div>
-      <div class="card">
-        <p class="kicker" style="font-size:28px">④</p>
-        <h4>Analysis</h4>
-        <p class="dim" style="font-size:13px">结构扫描 + 技术栈识别</p>
-      </div>
-      <div class="card">
-        <p class="kicker" style="font-size:28px">⑤</p>
-        <h4>Rename</h4>
-        <p class="dim" style="font-size:13px">按规范重命名，修复路径</p>
-      </div>
-      <div class="card">
-        <p class="kicker" style="font-size:28px">⑥</p>
-        <h4>Skill 介绍</h4>
-        <p class="dim" style="font-size:13px">682 人味儿写作，写完可传播</p>
-      </div>
-      <div class="card">
-        <p class="kicker" style="font-size:28px">⑦</p>
-        <h4>WPS Wiki</h4>
-        <p class="dim" style="font-size:13px">kdocs-cli 写入，长期沉淀</p>
-      </div>
-      <div class="card card-accent">
-        <p class="kicker" style="font-size:28px">⑧</p>
-        <h4>自检验收</h4>
-        <p class="dim" style="font-size:13px">631 Checklist 核对，Loop完成</p>
-      </div>
-    </div>
-    <div class="deck-footer">
-      <span class="dim2">流程</span>
-      <span class="slide-number" data-current="4" data-total="9"></span>
-    </div>
-  </section>
-
-  <!-- 5. 双Agent架构 -->
-  <section class="slide" data-title="Architecture">
-    <p class="kicker">Architecture</p>
-    <h2 class="h2">Maker + Checker 双层架构</h2>
-    <div class="grid g2 mt-l" style="align-items:start">
-      <div class="card anim-fade-left" data-anim="fade-left">
-        <h3>🤖 Maker Agent</h3>
-        <p class="dim">执行层，负责干活</p>
-        <ul class="mt-m">
-          <li>git clone + 环境验证</li>
-          <li>运行测试、分析结构</li>
-          <li>写入 SKILL.md</li>
-          <li>调用 renwei 写人味儿介绍</li>
-          <li>调用 kdocs 写 WPS Wiki</li>
-        </ul>
-        <div class="card mt-m" style="background:var(--surface-2)">
-          <p class="mono dim" style="font-size:12px">skill: 648-1<br>trigger: loop-go</p>
-        </div>
-      </div>
-      <div class="card anim-fade-right" data-anim="fade-right">
-        <h3>✅ Checker Agent</h3>
-        <p class="dim">验收层，负责挑刺</p>
-        <ul class="mt-m">
-          <li>对照 631 Checklist 逐项验收</li>
-          <li>验证产物完整性</li>
-          <li>检查 Skill 可安装性</li>
-          <li>检查 Wiki 可读性</li>
-          <li>发现缺陷 → 打回 Maker 重做</li>
-        </ul>
-        <div class="card mt-m" style="background:var(--surface-2)">
-          <p class="mono dim" style="font-size:12px">skill: 631<br>loop-engineering-selfcheck</p>
-        </div>
-      </div>
-    </div>
-    <div class="deck-footer">
-      <span class="dim2">架构</span>
-      <span class="slide-number" data-current="5" data-total="9"></span>
-    </div>
-  </section>
-
-  <!-- 6. 真实产出 -->
-  <section class="slide" data-title="Output">
-    <p class="kicker">Real Output</p>
-    <h2 class="h2">loop-go 的实际产出物</h2>
-    <div class="grid g3 mt-l anim-stagger-list" data-anim-target>
-      <div class="card card-accent">
-        <h4>📄 SKILL.md</h4>
-        <p class="dim">完整的 Hermes Skill 文件，包含 frontmatter、触发词、步骤、验收标准</p>
-        <div class="mono dim2 mt-m" style="font-size:11px;background:var(--surface-2);padding:10px;border-radius:var(--radius-sm)">
-          name: xxx-loop<br>
-          trigger: loop-go xxx<br>
-          steps: 8<br>
-          status: 正式
-        </div>
-      </div>
-      <div class="card card-accent">
-        <h4>📚 WPS Wiki</h4>
-        <p class="dim">kdocs-cli 写入，永久沉淀，可搜索、可协作</p>
-        <div class="mono dim2 mt-m" style="font-size:11px;background:var(--surface-2);padding:10px;border-radius:var(--radius-sm)">
-          path: BaiduSyncdisk/【NNN】/<br>
-          format: .otl<br>
-          content: 人味儿介绍
-        </div>
-      </div>
-      <div class="card card-accent">
-        <h4>🎫 飞书卡片</h4>
-        <p class="dim">自动推送，6大平台热搜 + 关键指标 + Wiki 链接</p>
-        <div class="mono dim2 mt-m" style="font-size:11px;background:var(--surface-2);padding:10px;border-radius:var(--radius-sm)">
-          trigger: feishu-card<br>
-          format: lark_md<br>
-          deliver: 即时
-        </div>
-      </div>
-    </div>
-    <div class="row wrap mt-l" style="gap:8px">
-      <span class="pill">📁 loop-go-exec/</span>
-      <span class="pill">📂 connector/</span>
-      <span class="pill">🎯 references/</span>
-      <span class="pill">✅ verification.md</span>
-    </div>
-    <div class="deck-footer">
-      <span class="dim2">产出</span>
-      <span class="slide-number" data-current="6" data-total="9"></span>
-    </div>
-  </section>
-
-  <!-- 7. 对比表 -->
-  <section class="slide" data-title="Compare">
-    <p class="kicker">Before vs After</p>
-    <h2 class="h2">手动处理 vs loop-go</h2>
-    <div class="card mt-l" style="overflow:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:14px">
-        <thead>
-          <tr style="border-bottom:1px solid var(--border)">
-            <th class="tl" style="padding:10px 16px">环节</th>
-            <th style="padding:10px 16px">手动</th>
-            <th style="padding:10px 16px">loop-go</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td class="tl" style="padding:10px 16px">clone + 依赖</td>
-            <td style="padding:10px 16px;color:var(--text-2)">10-30 分钟</td>
-            <td style="padding:10px 16px;color:var(--accent)">~1 分钟</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td class="tl" style="padding:10px 16px">README 分析</td>
-            <td style="padding:10px 16px;color:var(--text-2)">人工阅读 15 分钟</td>
-            <td style="padding:10px 16px;color:var(--accent)">自动结构扫描</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td class="tl" style="padding:10px 16px">测试验证</td>
-            <td style="padding:10px 16px;color:var(--text-2)">手动跑，易出错</td>
-            <td style="padding:10px 16px;color:var(--accent)">Checker 自动验收</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td class="tl" style="padding:10px 16px">写介绍</td>
-            <td style="padding:10px 16px;color:var(--text-2)">30 分钟 - 1 小时</td>
-            <td style="padding:10px 16px;color:var(--accent)">682 renwei ~3 分钟</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td class="tl" style="padding:10px 16px">Wiki 沉淀</td>
-            <td style="padding:10px 16px;color:var(--text-2)">手动复制粘贴排版</td>
-            <td style="padding:10px 16px;color:var(--accent)">kdocs-cli 自动写入</td>
-          </tr>
-          <tr>
-            <td class="tl" style="padding:10px 16px">总耗时</td>
-            <td style="padding:10px 16px;color:var(--text-2);font-weight:700">1-2 小时</td>
-            <td style="padding:10px 16px;color:var(--accent);font-weight:700">~5 分钟</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="deck-footer">
-      <span class="dim2">对比</span>
-      <span class="slide-number" data-current="7" data-total="9"></span>
-    </div>
-  </section>
-
-  <!-- 8. 触发词 -->
-  <section class="slide" data-title="Trigger">
-    <p class="kicker">How to Use</p>
-    <h2 class="h2">一句话，AI 自动跑完全流程</h2>
-    <div class="card mt-l anim-fade-up" data-anim="fade-up">
-      <div class="mono" style="font-size:20px;line-height:2;padding:24px;background:var(--surface-2);border-radius:var(--radius)">
-        <span style="color:var(--text-2)"># 触发 loop-go</span><br>
-        <span style="color:var(--accent)">loop-go</span> https://github.com/Fizz0x11/some-project<br><br>
-        <span style="color:var(--text-2)"># 或者用项目描述</span><br>
-        <span style="color:var(--accent)">loop-go</span> 一个GitHub上的AI工具聚合项目
-      </div>
-    </div>
-    <div class="grid g3 mt-l anim-stagger-list" data-anim-target>
-      <div class="card">
-        <p class="kicker">核心触发词</p>
-        <div class="mono dim2" style="font-size:13px;margin-top:8px">loop-go &lt;URL&gt;</div>
-      </div>
-      <div class="card">
-        <p class="kicker">父级入口</p>
-        <div class="mono dim2" style="font-size:13px;margin-top:8px">648 / AI Loop系统</div>
-      </div>
-      <div class="card">
-        <p class="kicker">GitHub Pages</p>
-        <div class="mono dim2" style="font-size:13px;margin-top:8px">fizz0x11.github.io/loop-go</div>
-      </div>
-    </div>
-    <div class="deck-footer">
-      <span class="dim2">触发词</span>
-      <span class="slide-number" data-current="8" data-total="9"></span>
-    </div>
-  </section>
-
-  <!-- 9. CTA -->
-  <section class="slide center tc" data-title="CTA">
-    <div>
-      <p class="kicker">Start now</p>
-      <h1 class="h1 anim-rise-in" data-anim="rise-in" style="font-size:96px">试试 <span class="gradient-text">loop-go</span></h1>
-      <p class="lede mt-m" style="max-width:700px;margin:14px auto 30px">
-        告诉你的 AI「帮我跑一下这个 GitHub 项目」，剩下的全部自动化。
-      </p>
-      <div class="grid g3" style="max-width:900px;margin:0 auto">
-        <div class="card">
-          <p class="kicker">📖 演示页</p>
-          <p class="mono dim2" style="font-size:12px;margin-top:6px">本页面 — 按 T 换主题</p>
-        </div>
-        <div class="card">
-          <p class="kicker">⚙️ 安装</p>
-          <p class="mono dim2" style="font-size:12px;margin-top:6px">hermes skill install</p>
-        </div>
-        <div class="card">
-          <p class="kicker">🚀 立即使用</p>
-          <p class="mono dim2" style="font-size:12px;margin-top:6px">loop-go &lt;URL&gt;</p>
-        </div>
-      </div>
-      <p class="dim2 mt-l" style="font-size:14px">←/→ 翻页 · T 换主题 · A 动画 · F 全屏 · O 概览 · S 备注</p>
-    </div>
-    <div class="deck-footer">
-      <span class="dim2">开始</span>
-      <span class="slide-number" data-current="9" data-total="9"></span>
-    </div>
-    <div class="notes">谢谢大家。有问题直接在群里问。</div>
-  </section>
-
+<!-- ── 1. HERO ── -->
+<div class="hero">
+  <div class="hero-kicker">HERMES SKILL #648 · LOOP ENGINEERING</div>
+  <h1><span class="g">loop-go</span></h1>
+  <p class="hero-lede">说一句话，AI 自动跑完整个 GitHub 项目：<br>clone → 分析 → 测试 → 写人味儿介绍 → 推 Wiki → 自检验收</p>
+  <div class="hero-pills">
+    <span class="pill pill-accent">⚡ 8步闭环</span>
+    <span class="pill pill-accent">🧠 Maker + Checker</span>
+    <span class="pill">📚 WPS Wiki</span>
+    <span class="pill">🎫 飞书推送</span>
+    <span class="pill">✅ 631 自检验收</span>
+  </div>
+  <button class="hero-trigger" onclick="document.querySelector('.trigger-box').scrollIntoView({behavior:'smooth'})">
+    试试 loop-go &nbsp;<code>loop-go &lt;URL&gt;</code>
+  </button>
 </div>
 
-<script src="/loop-go/assets/runtime.js"></script>
+<div class="divider"></div>
+
+<!-- ── 2. PAIN ── -->
+<div class="section">
+  <div class="section-kicker">Pain Point</div>
+  <h2 class="section-title">手动处理 GitHub 项目，<span class="g">每一步都在重复</span></h2>
+  <div class="pain-grid">
+    <div class="pain-card">
+      <div class="pain-num">PROBLEM 01</div>
+      <h3>clone 下来跑不动</h3>
+      <p>依赖装不上、README过时、环境变量缺失——每次都要手动排查，30分钟起步。</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-num">PROBLEM 02</div>
+      <h3>分析靠人工读 README</h3>
+      <p>项目结构、技术栈、核心模块——读完还是一头雾水，信息密度太低。</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-num">PROBLEM 03</div>
+      <h3>写介绍比项目本身还累</h3>
+      <p>要把技术细节转成别人能看懂的人味儿介绍，比写代码还费时间。</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-num">PROBLEM 04</div>
+      <h3>沉淀一次不够，每次都要重来</h3>
+      <p>Wiki / 飞书 / 文档——每个平台格式都不一样，每次都要重新排版。</p>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── 3. WHAT ── -->
+<div class="section">
+  <div class="section-kicker">Solution</div>
+  <h2 class="section-title">loop-go = <span class="g">一句话，全自动</span></h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px">
+    <div class="out-card">
+      <div class="out-icon">⚡</div>
+      <h4>分钟级完成</h4>
+      <p>以前手动30分钟，现在30秒。AI 自动跑完全链路，不用盯屏。</p>
+    </div>
+    <div class="out-card">
+      <div class="out-icon">🧠</div>
+      <h4>双层 Agent</h4>
+      <p>Maker 执行，Checker 验收。发现缺陷自动打回重做，不带病交付。</p>
+    </div>
+    <div class="out-card">
+      <div class="out-icon">📚</div>
+      <h4>自动沉淀</h4>
+      <p>SKILL.md + WPS Wiki + 飞书卡片，一次处理，永久沉淀，随时可查。</p>
+    </div>
+    <div class="out-card">
+      <div class="out-icon">🔄</div>
+      <h4>可复用循环</h4>
+      <p>做成 Skill 后，下次同类项目直接复用，不用再搭流程。</p>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── 4. 8-STEP FLOW ── -->
+<div class="section">
+  <div class="section-kicker">8-Step Pipeline</div>
+  <h2 class="section-title">完整执行<span class="g">闭环流程</span></h2>
+  <div class="flow-grid">
+    <div class="flow-card">
+      <div class="flow-num">STEP 01</div>
+      <h4>Trigger</h4>
+      <p>用户说「loop-go &lt;URL&gt;」</p>
+    </div>
+    <div class="flow-card">
+      <div class="flow-num">STEP 02</div>
+      <h4>Clone</h4>
+      <p>git clone + 初步环境验证</p>
+    </div>
+    <div class="flow-card">
+      <div class="flow-num">STEP 03</div>
+      <h4>Test</h4>
+      <p>运行测试、验证依赖完整性</p>
+    </div>
+    <div class="flow-card">
+      <div class="flow-num">STEP 04</div>
+      <h4>Analysis</h4>
+      <p>结构扫描 + 技术栈识别</p>
+    </div>
+    <div class="flow-card">
+      <div class="flow-num">STEP 05</div>
+      <h4>Rename</h4>
+      <p>按规范重命名，修复路径</p>
+    </div>
+    <div class="flow-card">
+      <div class="flow-num">STEP 06</div>
+      <h4>Skill 介绍</h4>
+      <p>682 人味儿写作，写完可传播</p>
+    </div>
+    <div class="flow-card">
+      <div class="flow-num">STEP 07</div>
+      <h4>WPS Wiki</h4>
+      <p>kdocs-cli 写入，长期沉淀</p>
+    </div>
+    <div class="flow-card last">
+      <div class="flow-num">STEP 08 ✅</div>
+      <h4>自检验收</h4>
+      <p>631 Checklist 核对，Loop 完成</p>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── 5. ARCHITECTURE ── -->
+<div class="section">
+  <div class="section-kicker">Architecture</div>
+  <h2 class="section-title"><span class="g">双层 Agent</span> 架构</h2>
+  <div class="arch-grid">
+    <div class="arch-card">
+      <h3>🤖 Maker Agent</h3>
+      <p class="sub">执行层，负责干活</p>
+      <ul>
+        <li>git clone + 环境验证</li>
+        <li>运行测试、分析结构</li>
+        <li>写入 SKILL.md</li>
+        <li>调用 682 renwei 写人味儿介绍</li>
+        <li>调用 kdocs 写 WPS Wiki</li>
+      </ul>
+      <div class="arch-badge">skill: 648-1 · trigger: loop-go</div>
+    </div>
+    <div class="arch-card">
+      <h3>✅ Checker Agent</h3>
+      <p class="sub">验收层，负责挑刺</p>
+      <ul>
+        <li>对照 631 Checklist 逐项验收</li>
+        <li>验证产物完整性</li>
+        <li>检查 Skill 可安装性</li>
+        <li>检查 Wiki 可读性</li>
+        <li>发现缺陷 → 打回 Maker 重做</li>
+      </ul>
+      <div class="arch-badge">skill: 631 · loop-engineering-selfcheck</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── 6. OUTPUTS ── -->
+<div class="section">
+  <div class="section-kicker">Deliverables</div>
+  <h2 class="section-title">实际<span class="g">产出物</span></h2>
+  <div class="out-grid">
+    <div class="out-card">
+      <div class="out-icon">📄</div>
+      <h4>SKILL.md</h4>
+      <p>完整的 Hermes Skill 文件，frontmatter + 触发词 + 步骤 + 验收标准</p>
+      <pre>name: xxx-loop
+trigger: loop-go &lt;URL&gt;
+status: 正式
+steps: 8</pre>
+    </div>
+    <div class="out-card">
+      <div class="out-icon">📚</div>
+      <h4>WPS Wiki</h4>
+      <p>kdocs-cli 写入，永久沉淀，可搜索、可协作</p>
+      <pre>path: BaiduSyncdisk/
+format: .otl
+人味儿 Skill 介绍</pre>
+    </div>
+    <div class="out-card">
+      <div class="out-icon">🎫</div>
+      <h4>飞书卡片</h4>
+      <p>自动推送，6大平台热搜 + 关键指标 + Wiki 链接</p>
+      <pre>format: lark_md
+deliver: 即时
+底部按钮 → Wiki</pre>
+    </div>
+    <div class="out-card">
+      <div class="out-icon">🎯</div>
+      <h4>人味儿介绍</h4>
+      <p>682 renwei 写法，场景 + 代价 + 工具对照，可直接发给同事</p>
+      <pre>场景 → 解决了什么麻烦
+代价 → 用了什么资源
+位置 → 在哪里找到它</pre>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── 7. COMPARE ── -->
+<div class="section">
+  <div class="section-kicker">Before vs After</div>
+  <h2 class="section-title">手动处理 vs <span class="g">loop-go</span></h2>
+  <div class="compare-card">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>环节</th>
+          <th>手动处理</th>
+          <th>loop-go</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>clone + 依赖</td>
+          <td class="bad">10-30 分钟</td>
+          <td class="good">~1 分钟</td>
+        </tr>
+        <tr>
+          <td>README 分析</td>
+          <td class="bad">人工阅读 15 分钟</td>
+          <td class="good">自动结构扫描</td>
+        </tr>
+        <tr>
+          <td>测试验证</td>
+          <td class="bad">手动跑，易出错</td>
+          <td class="good">Checker 自动验收</td>
+        </tr>
+        <tr>
+          <td>写介绍</td>
+          <td class="bad">30 分钟 - 1 小时</td>
+          <td class="good">682 renwei ~3 分钟</td>
+        </tr>
+        <tr>
+          <td>Wiki 沉淀</td>
+          <td class="bad">手动复制粘贴排版</td>
+          <td class="good">kdocs-cli 自动写入</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>总耗时</td>
+          <td>1-2 小时</td>
+          <td class="good">~5 分钟</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── 8. TRIGGER ── -->
+<div class="section">
+  <div class="section-kicker">How to Use</div>
+  <h2 class="section-title">立即<span class="g">开始使用</span></h2>
+  <div class="trigger-box">
+    <p style="font-size:14px;color:var(--text-2);margin-bottom:8px">对你的 AI 说：</p>
+    <pre><span class="cmt"># 触发 loop-go</span>
+<span class="cmd">loop-go</span> https://github.com/Fizz0x11/some-project
+
+<span class="cmt"># 或者用项目描述</span>
+<span class="cmd">loop-go</span> 一个GitHub上的AI工具聚合项目</pre>
+    <div class="trigger-info">
+      <div class="info-chip">
+        <div class="label">核心触发词</div>
+        <div class="val"><code>loop-go &lt;URL&gt;</code></div>
+      </div>
+      <div class="info-chip">
+        <div class="label">父级入口</div>
+        <div class="val">648 / AI Loop系统</div>
+      </div>
+      <div class="info-chip">
+        <div class="label">GitHub</div>
+        <div class="val">Fizz0x11/loop-go</div>
+      </div>
+      <div class="info-chip">
+        <div class="label">Pages</div>
+        <div class="val">本页面</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <p>loop-go · <a href="https://github.com/Fizz0x11/loop-go">GitHub</a> · Hermes Skill #648 · Loop Engineering</p>
+  <p style="margin-top:8px"><span class="kbd">T</span> 换主题 · 滚动阅读 · 信息密度优先</p>
+</footer>
+
+<script>
+const THEMES = ['aurora','tokyo-night','dracula','nord','catppuccin-mocha','gruvbox-dark','minimal-white','xiaohongshu-white','neo-brutalism'];
+let themeIdx = 0;
+
+function setTheme(name) {
+  document.getElementById('theme-link').href = `/loop-go/assets/themes/${name}.css`;
+  document.documentElement.setAttribute('data-theme', name);
+  document.querySelectorAll('.theme-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', THEMES[i] === name);
+  });
+  localStorage.setItem('loop-go-theme', name);
+}
+
+const saved = localStorage.getItem('loop-go-theme');
+if (saved) setTheme(saved);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 't' || e.key === 'T') {
+    themeIdx = (themeIdx + 1) % THEMES.length;
+    setTheme(THEMES[themeIdx]);
+  }
+});
+</script>
 </body>
 </html>
