@@ -1,401 +1,349 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="tokyo-night">
+<html lang="zh-CN" data-theme="aurora">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>loop-go — GitHub 项目全链路处理</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>loop-go · GitHub项目全链路处理</title>
 <link rel="stylesheet" href="/loop-go/assets/fonts.css">
 <link rel="stylesheet" href="/loop-go/assets/base.css">
-<link rel="stylesheet" id="theme-link" href="/loop-go/assets/themes/tokyo-night.css">
+<link rel="stylesheet" id="theme-link" href="/loop-go/assets/themes/aurora.css">
 <link rel="stylesheet" href="/loop-go/assets/animations/animations.css">
-<style>
-  :root {
-    --accent: #7aa2f7;
-    --accent-2: #bb9af7;
-    --grad: linear-gradient(135deg,#7aa2f7,#bb9af7 55%,#f7768e);
-  }
-  body { background: var(--bg); }
-
-  /* Step flow diagram */
-  .step-flow {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-top: 32px;
-  }
-  .step-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px 16px;
-    text-align: center;
-    position: relative;
-  }
-  .step-card .num {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    margin-bottom: 8px;
-  }
-  .step-card .who {
-    font-size: 10px;
-    color: var(--text-3);
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-  .step-card h4 {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-1);
-    margin: 0 0 6px 0;
-    line-height: 1.3;
-  }
-  .step-card p {
-    font-size: 11px;
-    color: var(--text-2);
-    margin: 0;
-    line-height: 1.4;
-  }
-  .step-card.maker { border-color: var(--accent); }
-  .step-card.maker .num { color: var(--accent); }
-  .step-card.checker { border-color: var(--accent-2); }
-  .step-card.checker .num { color: var(--accent-2); }
-  .step-card.system { border-color: var(--good); }
-  .step-card.system .num { color: var(--good); }
-
-  /* Arrow between steps */
-  .arrow {
-    position: absolute;
-    right: -14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-3);
-    font-size: 14px;
-    z-index: 2;
-  }
-
-  /* Dual agent section */
-  .dual-agent {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    margin-top: 24px;
-  }
-  .agent-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-  }
-  .agent-card.maker-agent { border-top: 3px solid var(--accent); }
-  .agent-card.checker-agent { border-top: 3px solid var(--accent-2); }
-  .agent-card h4 {
-    font-size: 15px;
-    font-weight: 700;
-    margin: 0 0 4px 0;
-    color: var(--text-1);
-  }
-  .agent-card .role {
-    font-size: 11px;
-    color: var(--text-3);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 16px;
-  }
-  .agent-card ul {
-    margin: 0;
-    padding-left: 20px;
-    font-size: 13px;
-    color: var(--text-2);
-    line-height: 1.8;
-  }
-  .agent-card ul li { margin-bottom: 4px; }
-
-  /* Trigger box */
-  .trigger-box {
-    display: inline-block;
-    background: var(--surface-2);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-sm);
-    padding: 10px 20px;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--accent);
-    margin: 16px 0;
-  }
-
-  /* Score table */
-  .score-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    margin-top: 16px;
-  }
-  .score-table th {
-    text-align: left;
-    padding: 10px 14px;
-    background: var(--surface-2);
-    color: var(--text-2);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    border-bottom: 1px solid var(--border);
-  }
-  .score-table td {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text-2);
-  }
-  .score-table tr:last-child td { border-bottom: none; }
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .badge-good { background: rgba(26,175,108,.15); color: var(--good); }
-  .badge-warn { background: rgba(245,165,36,.15); color: var(--warn); }
-  .badge-bad { background: rgba(224,68,90,.15); color: var(--bad); }
-
-  /* Theme switcher */
-  .theme-bar {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 40px;
-    padding: 8px 16px;
-    z-index: 100;
-    box-shadow: var(--shadow);
-  }
-  .theme-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    cursor: pointer;
-    transition: transform .2s, border-color .2s;
-  }
-  .theme-btn:hover { transform: scale(1.2); }
-  .theme-btn.active { border-color: var(--text-1); }
-</style>
 </head>
-<body>
+<body data-themes="aurora,tokyo-night,dracula,catppuccin-mocha,nord,gruvbox-dark,xiaohongshu-white,neo-brutalism" data-theme-base="/loop-go/assets/themes/">
+
 <div class="deck">
 
-  <!-- Slide 1: Cover -->
-  <section class="slide is-active" data-title="Cover">
-    <p class="kicker" style="color:var(--text-3);font-size:13px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px;">Skill #648 · GitHub Loop System</p>
-    <h1 class="h1 anim-fade-up" data-anim="fade-up" style="font-size:72px;line-height:1.05;margin:0 0 24px 0;letter-spacing:var(--letter-tight);">
-      loop-go
-    </h1>
-    <p class="lede" style="font-size:20px;color:var(--text-2);margin:0 0 8px 0;">Give a GitHub URL · AI runs the full loop</p>
-    <p style="font-size:14px;color:var(--text-3);margin:0 0 32px 0;">clone → test → introduce → wiki → review → handoff</p>
-    <div class="trigger-box">loop-go https://github.com/owner/repo</div>
-    <div class="deck-footer" style="position:absolute;bottom:32px;left:96px;right:96px;display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-size:12px;color:var(--text-3);">Fizz · 2026</span>
-      <span style="font-size:12px;color:var(--text-3);">github.com/Fizz0x11/loop-go</span>
+  <!-- 1. Cover -->
+  <section class="slide" data-title="Cover">
+    <div class="deck-header">
+      <span class="eyebrow">GitHub Loop · Fizz0x11</span>
+      <span class="eyebrow">hermes skill #648</span>
+    </div>
+    <p class="kicker">GitHub 项目处理自动化</p>
+    <h1 class="h1 anim-rise-in" data-anim="rise-in">loop-go</h1>
+    <p class="lede">说一句话，AI 自动跑完整个 GitHub 项目：<br>clone → 分析 → 测试 → 写人味儿介绍 → 推 Wiki → 自检验收</p>
+    <div class="row wrap mt-l" style="gap:8px">
+      <span class="pill pill-accent">8步闭环</span>
+      <span class="pill">Maker + Checker</span>
+      <span class="pill">WPS Wiki</span>
+      <span class="pill">飞书推送</span>
+    </div>
+    <div class="deck-footer">
+      <span class="dim2">触发词：loop-go &lt;GitHub-URL&gt;</span>
+      <span class="slide-number" data-current="1" data-total="9"></span>
+    </div>
+    <div class="notes">这是一次完整的 loop-go 演示。双击打开这个 HTML 就能用——按 T 换主题，按 ← → 翻页。</div>
+  </section>
+
+  <!-- 2. Pain Point -->
+  <section class="slide" data-title="Pain">
+    <p class="kicker">Pain Point</p>
+    <h2 class="h2">手动处理 GitHub 项目，每一步都在重复</h2>
+    <div class="grid g2 mt-l anim-stagger-list" data-anim-target>
+      <div class="card card-accent">
+        <h4>① clone 下来跑不动</h4>
+        <p class="dim">依赖装不上、README过时、环境变量缺失——每次都要手动排查。</p>
+      </div>
+      <div class="card card-accent">
+        <h4>② 分析靠人工读 README</h4>
+        <p class="dim">项目结构、技术栈、核心模块——读完还是一头雾水。</p>
+      </div>
+      <div class="card card-accent">
+        <h4>③ 写介绍比项目本身还累</h4>
+        <p class="dim">要把技术细节转成别人能看懂的人味儿介绍，比写代码还费时间。</p>
+      </div>
+      <div class="card card-accent">
+        <h4>④ 沉淀一次不够，每次都要重来</h4>
+        <p class="dim">Wiki / 飞书 / 文档——每个平台格式都不一样，每次都要重新排版。</p>
+      </div>
+    </div>
+    <div class="deck-footer">
+      <span class="dim2">问题</span>
+      <span class="slide-number" data-current="2" data-total="9"></span>
+    </div>
+    <div class="notes">这四个问题是每个AI工程师日常都会遇到的。loop-go 就是来解决这个的。</div>
+  </section>
+
+  <!-- 3. What is loop-go -->
+  <section class="slide center tc" data-title="What">
+    <div style="max-width:1100px">
+      <p class="kicker">What is loop-go</p>
+      <h1 class="h1 anim-rise-in" data-anim="rise-in" style="font-size:80px">一句话，<span class="gradient-text">全自动</span></h1>
+      <div class="card mt-l anim-fade-up" data-anim="fade-up">
+        <p class="serif" style="font-size:36px;line-height:1.5;text-align:center">
+          「帮我跑一下这个项目」<br>
+          <span class="dim">↓</span><br>
+          AI 自动完成：clone → 分析 → 测试 → 沉淀 → 验收
+        </p>
+      </div>
+      <div class="grid g3 mt-l">
+        <div class="card"><p class="kicker" style="font-size:32px">⚡</p><p class="dim">分钟级</p><p class="dim2">以前手动30分钟<br>现在30秒</p></div>
+        <div class="card"><p class="kicker" style="font-size:32px">🧠</p><p class="dim">双Agent</p><p class="dim2">Maker执行<br>Checker验收</p></div>
+        <div class="card"><p class="kicker" style="font-size:32px">📚</p><p class="dim">自动沉淀</p><p class="dim2">WPS Wiki<br>飞书卡片</p></div>
+      </div>
+    </div>
+    <div class="deck-footer">
+      <span class="dim2">是什么</span>
+      <span class="slide-number" data-current="3" data-total="9"></span>
     </div>
   </section>
 
-  <!-- Slide 2: What it does -->
-  <section class="slide" data-title="What">
-    <p class="kicker">What it does</p>
-    <h2 class="h2">One trigger · Full loop · Zero shortcuts</h2>
-    <div class="step-flow">
-      <div class="step-card maker"><span class="arrow">→</span>
-        <div class="num">STEP 01</div><div class="who">Maker Agent</div>
-        <h4>Clone + Test</h4><p>gh repo clone · npm install · run test</p>
+  <!-- 4. 8-Step Flow -->
+  <section class="slide" data-title="Flow">
+    <p class="kicker">8步闭环</p>
+    <h2 class="h2">loop-go 的完整执行流程</h2>
+    <div class="grid g4 mt-l anim-stagger-list" data-anim-target>
+      <div class="card">
+        <p class="kicker" style="font-size:28px">①</p>
+        <h4>Trigger</h4>
+        <p class="dim" style="font-size:13px">用户说「loop-go &lt;URL&gt;」</p>
       </div>
-      <div class="step-card checker"><span class="arrow">→</span>
-        <div class="num">STEP 02</div><div class="who">Checker Agent</div>
-        <h4>Score 0-10</h4><p>8+ pass · 5-7 fix · 0-4 retry</p>
+      <div class="card">
+        <p class="kicker" style="font-size:28px">②</p>
+        <h4>Clone</h4>
+        <p class="dim" style="font-size:13px">git clone + 初步环境验证</p>
       </div>
-      <div class="step-card system"><span class="arrow">→</span>
-        <div class="num">STEP 03</div><div class="who">System</div>
-        <h4>Write Wiki</h4><p>kdocs-cli · WPS Wiki</p>
+      <div class="card">
+        <p class="kicker" style="font-size:28px">③</p>
+        <h4>Test</h4>
+        <p class="dim" style="font-size:13px">运行测试、验证依赖完整性</p>
       </div>
-      <div class="step-card system">
-        <div class="num">STEP 04</div><div class="who">System</div>
-        <h4>631 Self-audit</h4><p>5 components · external memory</p>
+      <div class="card">
+        <p class="kicker" style="font-size:28px">④</p>
+        <h4>Analysis</h4>
+        <p class="dim" style="font-size:13px">结构扫描 + 技术栈识别</p>
+      </div>
+      <div class="card">
+        <p class="kicker" style="font-size:28px">⑤</p>
+        <h4>Rename</h4>
+        <p class="dim" style="font-size:13px">按规范重命名，修复路径</p>
+      </div>
+      <div class="card">
+        <p class="kicker" style="font-size:28px">⑥</p>
+        <h4>Skill 介绍</h4>
+        <p class="dim" style="font-size:13px">682 人味儿写作，写完可传播</p>
+      </div>
+      <div class="card">
+        <p class="kicker" style="font-size:28px">⑦</p>
+        <h4>WPS Wiki</h4>
+        <p class="dim" style="font-size:13px">kdocs-cli 写入，长期沉淀</p>
+      </div>
+      <div class="card card-accent">
+        <p class="kicker" style="font-size:28px">⑧</p>
+        <h4>自检验收</h4>
+        <p class="dim" style="font-size:13px">631 Checklist 核对，Loop完成</p>
       </div>
     </div>
-    <div style="margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
-      <div class="step-card system"><span class="arrow">→</span><div class="num">STEP 05</div><div class="who">System</div><h4>CE Review</h4><p>Plan·Work·Review·Compound</p></div>
-      <div class="step-card system"><span class="arrow">→</span><div class="num">STEP 06</div><div class="who">System</div><h4>Self-reflect</h4><p>Honest checklist</p></div>
-      <div class="step-card system"><span class="arrow">→</span><div class="num">STEP 07</div><div class="who">System</div><h4>Handoff</h4><p>Human-readable record</p></div>
-      <div class="step-card system"><div class="num">STEP 08</div><div class="who">System</div><h4>Ask</h4><p>Cron? Feishu card?</p></div>
+    <div class="deck-footer">
+      <span class="dim2">流程</span>
+      <span class="slide-number" data-current="4" data-total="9"></span>
     </div>
   </section>
 
-  <!-- Slide 3: Dual Agent -->
-  <section class="slide" data-title="Dual Agent">
-    <p class="kicker">Core Design</p>
-    <h2 class="h2">Maker 与 Checker 必须分离</h2>
-    <div class="dual-agent">
-      <div class="agent-card maker-agent">
-        <h4>Maker Agent</h4>
-        <div class="role">执行层 · Cloner</div>
-        <ul>
-          <li>Clone + read README</li>
-          <li>Install dependencies</li>
-          <li>Run a real test command</li>
-          <li>Write Wiki draft</li>
-          <li>Call <code>connector/clone-and-test.md</code></li>
+  <!-- 5. 双Agent架构 -->
+  <section class="slide" data-title="Architecture">
+    <p class="kicker">Architecture</p>
+    <h2 class="h2">Maker + Checker 双层架构</h2>
+    <div class="grid g2 mt-l" style="align-items:start">
+      <div class="card anim-fade-left" data-anim="fade-left">
+        <h3>🤖 Maker Agent</h3>
+        <p class="dim">执行层，负责干活</p>
+        <ul class="mt-m">
+          <li>git clone + 环境验证</li>
+          <li>运行测试、分析结构</li>
+          <li>写入 SKILL.md</li>
+          <li>调用 renwei 写人味儿介绍</li>
+          <li>调用 kdocs 写 WPS Wiki</li>
         </ul>
+        <div class="card mt-m" style="background:var(--surface-2)">
+          <p class="mono dim" style="font-size:12px">skill: 648-1<br>trigger: loop-go</p>
+        </div>
       </div>
-      <div class="agent-card checker-agent">
-        <h4>Checker Agent</h4>
-        <div class="role">验收层 · Auditor</div>
-        <ul>
-          <li>Score output 0-10</li>
-          <li>Check: did clone actually run?</li>
-          <li>Check: did tests actually execute?</li>
-          <li>Reject if score &lt; 8</li>
-          <li>Call <code>connector/verification.md</code></li>
+      <div class="card anim-fade-right" data-anim="fade-right">
+        <h3>✅ Checker Agent</h3>
+        <p class="dim">验收层，负责挑刺</p>
+        <ul class="mt-m">
+          <li>对照 631 Checklist 逐项验收</li>
+          <li>验证产物完整性</li>
+          <li>检查 Skill 可安装性</li>
+          <li>检查 Wiki 可读性</li>
+          <li>发现缺陷 → 打回 Maker 重做</li>
         </ul>
+        <div class="card mt-m" style="background:var(--surface-2)">
+          <p class="mono dim" style="font-size:12px">skill: 631<br>loop-engineering-selfcheck</p>
+        </div>
       </div>
     </div>
-    <p style="margin-top:20px;font-size:13px;color:var(--text-3);text-align:center;">
-      Same agent doing both = easy to fool yourself. The separation makes results real.
-    </p>
+    <div class="deck-footer">
+      <span class="dim2">架构</span>
+      <span class="slide-number" data-current="5" data-total="9"></span>
+    </div>
   </section>
 
-  <!-- Slide 4: Scoring -->
-  <section class="slide" data-title="Scoring">
-    <p class="kicker">Verification</p>
-    <h2 class="h2">8 分及格线</h2>
-    <table class="score-table">
-      <tr><th>Score</th><th>Verdict</th><th>Action</th></tr>
-      <tr>
-        <td><span class="badge badge-good">8–10</span></td>
-        <td>✅ Pass</td>
-        <td>Continue to next step</td>
-      </tr>
-      <tr>
-        <td><span class="badge badge-warn">5–7</span></td>
-        <td>⚠️ Fix items</td>
-        <td>List what to fix, back to maker</td>
-      </tr>
-      <tr>
-        <td><span class="badge badge-bad">0–4</span></td>
-        <td>🔴 Fail</td>
-        <td>Retry from step 1</td>
-      </tr>
-    </table>
-    <div style="margin-top:24px;padding:16px;background:var(--surface-2);border-radius:var(--radius-sm);border-left:3px solid var(--accent);">
-      <p style="margin:0;font-size:13px;color:var(--text-2);line-height:1.6;">
-        <strong>Score dimensions:</strong><br>
-        A) Basic info (project type, README) · B) Reality check (did commands actually run?) · C) Wiki quality
+  <!-- 6. 真实产出 -->
+  <section class="slide" data-title="Output">
+    <p class="kicker">Real Output</p>
+    <h2 class="h2">loop-go 的实际产出物</h2>
+    <div class="grid g3 mt-l anim-stagger-list" data-anim-target>
+      <div class="card card-accent">
+        <h4>📄 SKILL.md</h4>
+        <p class="dim">完整的 Hermes Skill 文件，包含 frontmatter、触发词、步骤、验收标准</p>
+        <div class="mono dim2 mt-m" style="font-size:11px;background:var(--surface-2);padding:10px;border-radius:var(--radius-sm)">
+          name: xxx-loop<br>
+          trigger: loop-go xxx<br>
+          steps: 8<br>
+          status: 正式
+        </div>
+      </div>
+      <div class="card card-accent">
+        <h4>📚 WPS Wiki</h4>
+        <p class="dim">kdocs-cli 写入，永久沉淀，可搜索、可协作</p>
+        <div class="mono dim2 mt-m" style="font-size:11px;background:var(--surface-2);padding:10px;border-radius:var(--radius-sm)">
+          path: BaiduSyncdisk/【NNN】/<br>
+          format: .otl<br>
+          content: 人味儿介绍
+        </div>
+      </div>
+      <div class="card card-accent">
+        <h4>🎫 飞书卡片</h4>
+        <p class="dim">自动推送，6大平台热搜 + 关键指标 + Wiki 链接</p>
+        <div class="mono dim2 mt-m" style="font-size:11px;background:var(--surface-2);padding:10px;border-radius:var(--radius-sm)">
+          trigger: feishu-card<br>
+          format: lark_md<br>
+          deliver: 即时
+        </div>
+      </div>
+    </div>
+    <div class="row wrap mt-l" style="gap:8px">
+      <span class="pill">📁 loop-go-exec/</span>
+      <span class="pill">📂 connector/</span>
+      <span class="pill">🎯 references/</span>
+      <span class="pill">✅ verification.md</span>
+    </div>
+    <div class="deck-footer">
+      <span class="dim2">产出</span>
+      <span class="slide-number" data-current="6" data-total="9"></span>
+    </div>
+  </section>
+
+  <!-- 7. 对比表 -->
+  <section class="slide" data-title="Compare">
+    <p class="kicker">Before vs After</p>
+    <h2 class="h2">手动处理 vs loop-go</h2>
+    <div class="card mt-l" style="overflow:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:14px">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th class="tl" style="padding:10px 16px">环节</th>
+            <th style="padding:10px 16px">手动</th>
+            <th style="padding:10px 16px">loop-go</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td class="tl" style="padding:10px 16px">clone + 依赖</td>
+            <td style="padding:10px 16px;color:var(--text-2)">10-30 分钟</td>
+            <td style="padding:10px 16px;color:var(--accent)">~1 分钟</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td class="tl" style="padding:10px 16px">README 分析</td>
+            <td style="padding:10px 16px;color:var(--text-2)">人工阅读 15 分钟</td>
+            <td style="padding:10px 16px;color:var(--accent)">自动结构扫描</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td class="tl" style="padding:10px 16px">测试验证</td>
+            <td style="padding:10px 16px;color:var(--text-2)">手动跑，易出错</td>
+            <td style="padding:10px 16px;color:var(--accent)">Checker 自动验收</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td class="tl" style="padding:10px 16px">写介绍</td>
+            <td style="padding:10px 16px;color:var(--text-2)">30 分钟 - 1 小时</td>
+            <td style="padding:10px 16px;color:var(--accent)">682 renwei ~3 分钟</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td class="tl" style="padding:10px 16px">Wiki 沉淀</td>
+            <td style="padding:10px 16px;color:var(--text-2)">手动复制粘贴排版</td>
+            <td style="padding:10px 16px;color:var(--accent)">kdocs-cli 自动写入</td>
+          </tr>
+          <tr>
+            <td class="tl" style="padding:10px 16px">总耗时</td>
+            <td style="padding:10px 16px;color:var(--text-2);font-weight:700">1-2 小时</td>
+            <td style="padding:10px 16px;color:var(--accent);font-weight:700">~5 分钟</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="deck-footer">
+      <span class="dim2">对比</span>
+      <span class="slide-number" data-current="7" data-total="9"></span>
+    </div>
+  </section>
+
+  <!-- 8. 触发词 -->
+  <section class="slide" data-title="Trigger">
+    <p class="kicker">How to Use</p>
+    <h2 class="h2">一句话，AI 自动跑完全流程</h2>
+    <div class="card mt-l anim-fade-up" data-anim="fade-up">
+      <div class="mono" style="font-size:20px;line-height:2;padding:24px;background:var(--surface-2);border-radius:var(--radius)">
+        <span style="color:var(--text-2)"># 触发 loop-go</span><br>
+        <span style="color:var(--accent)">loop-go</span> https://github.com/Fizz0x11/some-project<br><br>
+        <span style="color:var(--text-2)"># 或者用项目描述</span><br>
+        <span style="color:var(--accent)">loop-go</span> 一个GitHub上的AI工具聚合项目
+      </div>
+    </div>
+    <div class="grid g3 mt-l anim-stagger-list" data-anim-target>
+      <div class="card">
+        <p class="kicker">核心触发词</p>
+        <div class="mono dim2" style="font-size:13px;margin-top:8px">loop-go &lt;URL&gt;</div>
+      </div>
+      <div class="card">
+        <p class="kicker">父级入口</p>
+        <div class="mono dim2" style="font-size:13px;margin-top:8px">648 / AI Loop系统</div>
+      </div>
+      <div class="card">
+        <p class="kicker">GitHub Pages</p>
+        <div class="mono dim2" style="font-size:13px;margin-top:8px">fizz0x11.github.io/loop-go</div>
+      </div>
+    </div>
+    <div class="deck-footer">
+      <span class="dim2">触发词</span>
+      <span class="slide-number" data-current="8" data-total="9"></span>
+    </div>
+  </section>
+
+  <!-- 9. CTA -->
+  <section class="slide center tc" data-title="CTA">
+    <div>
+      <p class="kicker">Start now</p>
+      <h1 class="h1 anim-rise-in" data-anim="rise-in" style="font-size:96px">试试 <span class="gradient-text">loop-go</span></h1>
+      <p class="lede mt-m" style="max-width:700px;margin:14px auto 30px">
+        告诉你的 AI「帮我跑一下这个 GitHub 项目」，剩下的全部自动化。
       </p>
+      <div class="grid g3" style="max-width:900px;margin:0 auto">
+        <div class="card">
+          <p class="kicker">📖 演示页</p>
+          <p class="mono dim2" style="font-size:12px;margin-top:6px">本页面 — 按 T 换主题</p>
+        </div>
+        <div class="card">
+          <p class="kicker">⚙️ 安装</p>
+          <p class="mono dim2" style="font-size:12px;margin-top:6px">hermes skill install</p>
+        </div>
+        <div class="card">
+          <p class="kicker">🚀 立即使用</p>
+          <p class="mono dim2" style="font-size:12px;margin-top:6px">loop-go &lt;URL&gt;</p>
+        </div>
+      </div>
+      <p class="dim2 mt-l" style="font-size:14px">←/→ 翻页 · T 换主题 · A 动画 · F 全屏 · O 概览 · S 备注</p>
     </div>
+    <div class="deck-footer">
+      <span class="dim2">开始</span>
+      <span class="slide-number" data-current="9" data-total="9"></span>
+    </div>
+    <div class="notes">谢谢大家。有问题直接在群里问。</div>
   </section>
 
-  <!-- Slide 5: File Structure -->
-  <section class="slide" data-title="Files">
-    <p class="kicker">Repository</p>
-    <h2 class="h2">File Structure</h2>
-    <pre style="background:var(--surface-2);border-radius:var(--radius);padding:24px;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--text-2);margin-top:16px;overflow:auto;">
-loop-go/
-├── index.html              ← Presentation (this page)
-├── README.md               ← English project README
-├── SKILL.md                ← Parent skill (trigger entry)
-├── LICENSE                 ← MIT
-└── loop-go-exec/
-    ├── SKILL.md            ← Execution layer (326 lines, 8 steps)
-    └── references/connector/
-        ├── clone-and-test.md   ← Maker agent instructions
-        └── verification.md     ← Checker agent criteria
-    </pre>
-    <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div style="padding:14px;background:var(--surface-2);border-radius:var(--radius-sm);font-size:12px;color:var(--text-2);">
-        <strong style="color:var(--text-1)">Hermes skill:</strong><br>
-        hermes/skills/648-github-project-loop/
-      </div>
-      <div style="padding:14px;background:var(--surface-2);border-radius:var(--radius-sm);font-size:12px;color:var(--text-2);">
-        <strong style="color:var(--text-1)">Live demo:</strong><br>
-        fizz0x11.github.io/loop-go/
-      </div>
-    </div>
-  </section>
-
-  <!-- Slide 6: Self-reflection -->
-  <section class="slide" data-title="Reflect">
-    <p class="kicker">Step 6</p>
-    <h2 class="h2">Self-Reflection Checklist</h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px;">
-      <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2);">
-        <span style="color:var(--accent);font-weight:700;margin-right:8px;">✓</span>
-        clone 真的跑了吗？
-      </div>
-      <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2);">
-        <span style="color:var(--accent);font-weight:700;margin-right:8px;">✓</span>
-        测试命令真的执行了吗？
-      </div>
-      <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2);">
-        <span style="color:var(--accent);font-weight:700;margin-right:8px;">✓</span>
-        handoff 写了吗？
-      </div>
-      <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2);">
-        <span style="color:var(--accent);font-weight:700;margin-right:8px;">✓</span>
-        CE Review 三个字段填全了吗？
-      </div>
-      <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2);">
-        <span style="color:var(--accent);font-weight:700;margin-right:8px;">✓</span>
-        自检诚实吗？
-      </div>
-      <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2);">
-        <span style="color:var(--accent);font-weight:700;margin-right:8px;">→</span>
-        下次要改什么？
-      </div>
-    </div>
-    <p style="margin-top:20px;font-size:13px;color:var(--text-3);text-align:center;">
-      After each loop, the AI checks itself. The loop improves itself.
-    </p>
-  </section>
-
-</div>
-
-<!-- Theme switcher bar -->
-<div class="theme-bar">
-  <button class="theme-btn active" style="background:#7aa2f7;" onclick="setTheme('tokyo-night')" title="Tokyo Night"></button>
-  <button class="theme-btn" style="background:#bd93f9;" onclick="setTheme('dracula')" title="Dracula"></button>
-  <button class="theme-btn" style="background:#89b4fa;" onclick="setTheme('nord')" title="Nord"></button>
-  <button class="theme-btn" style="background:#cba6f7;" onclick="setTheme('catppuccin-mocha')" title="Catppuccin Mocha"></button>
-  <button class="theme-btn" style="background:#f7768e;" onclick="setTheme('rose-pine')" title="Rose Pine"></button>
-  <button class="theme-btn" style="background:#a9b1d6;" onclick="setTheme('gruvbox-dark')" title="Gruvbox"></button>
 </div>
 
 <script src="/loop-go/assets/runtime.js"></script>
-<script>
-const THEMES = ['tokyo-night','dracula','nord','catppuccin-mocha','rose-pine','gruvbox-dark'];
-let themeIdx = 0;
-
-function setTheme(name) {
-  document.getElementById('theme-link').href = `/loop-go/assets/themes/${name}.css`;
-  document.documentElement.setAttribute('data-theme', name);
-  document.querySelectorAll('.theme-btn').forEach((btn, i) => {
-    btn.classList.toggle('active', THEMES[i] === name);
-  });
-  localStorage.setItem('loop-go-theme', name);
-}
-
-const saved = localStorage.getItem('loop-go-theme');
-if (saved) setTheme(saved);
-
-// Keyboard: T = theme, ←→ = slides, number = jump
-document.addEventListener('keydown', e => {
-  if (e.key === 't' || e.key === 'T') {
-    themeIdx = (themeIdx + 1) % THEMES.length;
-    setTheme(THEMES[themeIdx]);
-  }
-});
-</script>
 </body>
 </html>
