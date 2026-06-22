@@ -4,9 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>loop-go · GitHub项目全链路处理</title>
-<link rel="stylesheet" href="/loop-go/assets/fonts.css">
-<link rel="stylesheet" href="/loop-go/assets/base.css">
-<link rel="stylesheet" id="theme-link" href="/loop-go/assets/themes/aurora.css">
+<!-- 主题变量全部内联，无需外置 CSS -->
 <style>
   /* ================================================
      720 配色体系 — loop-go Aurora 主题换装版
@@ -465,7 +463,6 @@ const THEMES = ['aurora','tokyo-night','dracula','nord','catppuccin-mocha','gruv
 let themeIdx = 0;
 
 function setTheme(name) {
-  document.getElementById('theme-link').href = `/loop-go/assets/themes/${name}.css`;
   document.documentElement.setAttribute('data-theme', name);
   document.querySelectorAll('.theme-btn').forEach((btn, i) => {
     btn.classList.toggle('active', THEMES[i] === name);
