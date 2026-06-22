@@ -8,10 +8,10 @@
 <style>
   /* ================================================
      720 配色体系 — loop-go Aurora 主题换装版
-     主色: #C94F2C 陶红 | 背景: Tokyo Night
+     主色: #7AA2F7 蓝 + #bb9af7 紫 | Tokyo Night 背景
      ================================================ */
 
-  /* 720 CSS 变量（替换 Aurora 变量） */
+  /* 720 CSS 变量 */
   :root {
     --page-bg: #1A1B26;
     --card-bg: #16161E;
@@ -20,9 +20,9 @@
     --surface-2: #1f2335;
     --text-1: #C0CAF5;
     --text-2: #a9b1d6;
-    --accent: #C94F2C;
-    --accent-2: #C0CAF5;
-    --grad: linear-gradient(135deg, #C94F2C, #C0CAF5);
+    --accent: #7AA2F7;
+    --accent-2: #bb9af7;
+    --grad: linear-gradient(135deg, #7AA2F7, #bb9af7);
     --font-mono: ui-monospace,'Cascadia Code',monospace;
   }
 
@@ -148,8 +148,8 @@
   <div class="header-spacer"></div>
   <div class="theme-buttons">
     <span class="theme-label">Theme:</span>
-    <!-- 720 陶红按钮 active -->
-    <button class="theme-btn active" style="background:#C94F2C" onclick="setTheme('aurora')" title="Aurora (720)"></button>
+    <!-- 720 Tokyo Night 蓝紫 active -->
+    <button class="theme-btn active" style="background:#7AA2F7" onclick="setTheme('aurora')" title="Aurora (720)"></button>
     <button class="theme-btn" style="background:#7aa2f7" onclick="setTheme('tokyo-night')" title="Tokyo Night"></button>
     <button class="theme-btn" style="background:#bd93f9" onclick="setTheme('dracula')" title="Dracula"></button>
     <button class="theme-btn" style="background:#8bace3" onclick="setTheme('nord')" title="Nord"></button>
