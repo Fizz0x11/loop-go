@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="aurora">
+<html lang="zh-CN" data-theme="720">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -26,9 +26,11 @@
     --font-mono: ui-monospace,'Cascadia Code',monospace;
   }
 
-  /* 亮色主题保留 */
-  [data-theme="minimal-white"]{--page-bg:#f8f7f4;--card-bg:#fff;--card-border:#e5e3df;--text-1:#1A1B26;--text-2:#444;--accent:#C94F2C;--surface-2:#f0ede8}
-  [data-theme="tokyo-night"],[data-theme="dracula"],[data-theme="nord"],[data-theme="catppuccin-mocha"],[data-theme="gruvbox-dark"],[data-theme="aurora"],[data-theme="neo-brutalism"]{--page-bg:#0b0d14;--card-bg:#111520;--card-border:rgba(255,255,255,.08)}
+  /* 720 专属暗色主题（Tokyo Night 体系） */
+  [data-theme="720"]{--page-bg:#1A1B26;--card-bg:#16161E;--card-border:#2f3549}
+  /* 亮色主题 */
+  [data-theme="minimal-white"]{--page-bg:#f8f7f4;--card-bg:#fff;--card-border:#e5e3df;--text-1:#1A1B26;--text-2:#444;--accent:#7AA2F7;--surface-2:#f0ede8}
+  [data-theme="tokyo-night"],[data-theme="dracula"],[data-theme="nord"],[data-theme="catppuccin-mocha"],[data-theme="gruvbox-dark"],[data-theme="neo-brutalism"]{--page-bg:#0b0d14;--card-bg:#111520;--card-border:rgba(255,255,255,.08)}
   [data-theme="xiaohongshu-white"]{--page-bg:#faf9f7;--card-bg:#fff;--card-border:#f0ece6}
 
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -149,7 +151,7 @@
   <div class="theme-buttons">
     <span class="theme-label">Theme:</span>
     <!-- 720 Tokyo Night 蓝紫 active -->
-    <button class="theme-btn active" style="background:#7AA2F7" onclick="setTheme('aurora')" title="Aurora (720)"></button>
+    <button class="theme-btn active" style="background:#7AA2F7" onclick="setTheme('720')" title="720 (Fizz)"></button>
     <button class="theme-btn" style="background:#7aa2f7" onclick="setTheme('tokyo-night')" title="Tokyo Night"></button>
     <button class="theme-btn" style="background:#bd93f9" onclick="setTheme('dracula')" title="Dracula"></button>
     <button class="theme-btn" style="background:#8bace3" onclick="setTheme('nord')" title="Nord"></button>
@@ -459,7 +461,7 @@ deliver: 即时
 </footer>
 
 <script>
-const THEMES = ['aurora','tokyo-night','dracula','nord','catppuccin-mocha','gruvbox-dark','minimal-white','xiaohongshu-white','neo-brutalism'];
+const THEMES = ['720','tokyo-night','dracula','nord','catppuccin-mocha','gruvbox-dark','minimal-white','xiaohongshu-white','neo-brutalism'];
 let themeIdx = 0;
 
 function setTheme(name) {
